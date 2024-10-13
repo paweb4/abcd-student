@@ -26,7 +26,7 @@ pipeline {
                 sh '''
                     docker stop zap || true
                     docker rm zap || true
-                    docker run -u root --name zap \
+                    docker run --name zap \
                         --add-host=host.docker.internal:host-gateway \
                         -v /home/kali/Desktop/abc_devsecops/abcd-student/.zap:/zap/wrk/:rw \
                         -t ghcr.io/zaproxy/zaproxy:stable bash -c \
