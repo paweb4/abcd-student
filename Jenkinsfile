@@ -24,6 +24,8 @@ pipeline {
                     echo "App is ready"
                 '''
                 sh '''
+                    docker stop zap || true
+                    docker rm zap || true
                     docker run --name zap \
                         --add-host=host.docker.internal:host-gateway \
                         -v /home/kali/Desktop/abc_devsecops/abcd-student/.zap:/zap/wrk/:rw \
