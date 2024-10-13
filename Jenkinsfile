@@ -29,12 +29,13 @@ pipeline {
                     docker run --name zap \
                         --add-host=host.docker.internal:host-gateway \
                         -v /home/kali/Desktop/abc_devsecops/abcd-student/.zap:/zap/wrk/:rw \
-                        -it ghcr.io/zaproxy/zaproxy:stable bash -c \
+                        -t ghcr.io/zaproxy/zaproxy:stable bash -c \
                         "zap.sh -cmd -addonupdate; \
                         zap.sh -cmd -addoninstall communityScripts && \
                         zap.sh -cmd -addoninstall pscanrulesAlpha && \
                         zap.sh -cmd -addoninstall pscanrulesBeta && \
-                        zap.sh -cmd -autorun /zap/wrk/passive.yaml"
+                        zap.sh -cmd -autorun /zap/wrk/passive.yaml; \
+                        tail -f /dev/null"
                 '''
             }
             post {
