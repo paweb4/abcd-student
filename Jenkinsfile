@@ -18,9 +18,10 @@ pipeline {
                     docker stop juice-shop
                     docker rm juice-shop
                     docker run --name juice-shop -d -p 3000:3000 bkimminich/juice-shop
-                    while ! curl -s http://localhost:3000; do
+                    while [ "$(docker inspect -f '{{.State.Running}}' juice-shop)" != "true" ]; do
                         sleep 5
                     done
+                    echo "App is ready"
                 '''
                 sh '''
                     docker run --name zap \
