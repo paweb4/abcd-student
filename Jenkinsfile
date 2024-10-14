@@ -12,6 +12,11 @@ pipeline {
                 }
             }
         }
+        stage('Prepare') {
+            steps {
+                sh 'mkdir -p results/'
+            }
+        }
         stage('ZAP SCAN') {
             steps {
                 sh '''
