@@ -51,12 +51,10 @@ pipeline {
                         docker rm zap
                     '''
                     // Publikacja raportu do DefectDojo
+                    echo  'Archiving results...'
+                    archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
+                    echo 'Sending reports to DefectDojo' 
                     defectDojoPublisher(artifact: "results/zap_xml_report.xml", 
-                                        productName: 'Juice Shop', 
-                                        scanType: 'ZAP Scan', 
-                                        engagementName: 'paweb4@gmail.com')
-
-                    defectDojoPublisher(artifact: "results/zap_html_report.html", 
                                         productName: 'Juice Shop', 
                                         scanType: 'ZAP Scan', 
                                         engagementName: 'paweb4@gmail.com')
