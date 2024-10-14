@@ -40,18 +40,18 @@ pipeline {
             post {
                 always {
                     sh '''
-                        docker cp zap:/zap/wrk/reports/zap_html_report.html "${WORKSPACE}"/results/zap_html_report.html
-                        docker cp zap:/zap/wrk/reports/zap_xml_report.xml "${WORKSPACE}"/results/zap_xml_report.xml
+                        docker cp zap:/zap/wrk/reports/zap_html_report.html "${WORKSPACE}/results/zap_html_report.html"
+                        docker cp zap:/zap/wrk/reports/zap_xml_report.xml "${WORKSPACE}/results/zap_xml_report.xml"
                         docker stop zap juice-shop
                         docker rm zap
                     '''
                     // Publikacja raportu do DefectDojo
-                    defectDojoPublisher(artifact: ".zap/reports/zap_xml_report.xml", 
+                    defectDojoPublisher(artifact: "results/zap_xml_report.xml", 
                                         productName: 'Juice Shop', 
                                         scanType: 'ZAP Scan', 
                                         engagementName: 'paweb4@gmail.com')
 
-                    defectDojoPublisher(artifact: ".zap/reports/zap_html_report.html", 
+                    defectDojoPublisher(artifact: "results/zap_html_report.html", 
                                         productName: 'Juice Shop', 
                                         scanType: 'ZAP Scan', 
                                         engagementName: 'paweb4@gmail.com')
