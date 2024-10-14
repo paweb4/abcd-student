@@ -34,15 +34,14 @@ pipeline {
                         zap.sh -cmd -addoninstall communityScripts && \
                         zap.sh -cmd -addoninstall pscanrulesAlpha && \
                         zap.sh -cmd -addoninstall pscanrulesBeta && \
-                        zap.sh -cmd -autorun /zap/wrk/passive.yaml; \
-                        tail -f /dev/null"
+                        zap.sh -cmd -autorun /zap/wrk/passive.yaml"
                 '''
             }
             post {
                 always {
                     sh '''
-                        docker cp zap:/zap/wrk/reports/zap_html_report.html abcd-lab:${WORKSPACE}/.zap/reports/zap_html_report.html
-                        docker cp zap:/zap/wrk/reports/zap_xml_report.xml abcd-lab:${WORKSPACE}/.zap/reports/zap_xml_report.xml
+                        docker cp /home/kali/Desktop/abc_devsecops/abcd-student/.zap/zap_html_report.html abcd-lab:${WORKSPACE}/.zap/reports/zap_html_report.html
+                        docker cp /home/kali/Desktop/abc_devsecops/abcd-student/.zap/zap_xml_report.xml abcd-lab:${WORKSPACE}/.zap/reports/zap_xml_report.xml
                         docker stop zap juice-shop
                     '''
                     // Publikacja raportu do DefectDojo
