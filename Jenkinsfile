@@ -64,10 +64,21 @@ pipeline {
         stage('OSV Scan') {
             steps {
                 sh '''
-                    if ! command -v osv-scanner &> /dev/null; then
-                        curl -sL https://github.com/google/osv-scanner/releases/download/v1.0.1/osv-scanner_1.0.1_linux_amd64.tar.gz | tar xz
-                        sudo mv osv-scanner /usr/local/bin/
+                    if ! command -v go; then
+                        echo "Go not found. Installing Go..."
+                        curl -OL https://golang.org/dl/go1.20.5.linux-amd64.tar.gz
+                        sudo tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+                        export PATH=$PATH:/usr/local/go/bin
+                        echo "Go installed successfully."
                     fi
+                    
+                    if ! command -v osv-scanner; then
+                        echo "OSV Scanner not found. Installing via Go..."
+                        go install github.com/google/osv-scanner/cmd/osv-scanner@v1
+                        export PATH=$PATH:$HOME/go/bin
+                        echo "OSV Scanner installed successfully."
+                    fi
+                    
                     osv-scanner --lockfile=package-lock.json --json > results/osv_report.json
                 '''
             }
