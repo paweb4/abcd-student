@@ -90,7 +90,7 @@ pipeline {
                     echo 'Archiving results...'
                     archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
                     echo 'Sending OSV reports to DefectDojo'
-                    defectDojoPublisher(artifact: "results/osv_report.json",
+                    defectDojoPublisher(artifact: "results/sca-osv-scanner.json",
                                         productName: 'Juice Shop',
                                         scanType: 'OSV Scan',
                                         engagementName: 'paweb4@gmail.com')
