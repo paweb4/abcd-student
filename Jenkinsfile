@@ -47,16 +47,41 @@ pipeline {
                     sh '''
                         docker cp zap:/zap/wrk/reports/zap_html_report.html "${WORKSPACE}/results/zap_html_report.html"
                         docker cp zap:/zap/wrk/reports/zap_xml_report.xml "${WORKSPACE}/results/zap_xml_report.xml"
-                        docker stop zap juice-shop
+                        docker stop zap
                         docker rm zap
                     '''
                     // Publikacja raportu do DefectDojo
                     echo  'Archiving results...'
                     archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
-                    echo 'Sending reports to DefectDojo' 
+                    echo 'Sending DAST reports to DefectDojo' 
                     defectDojoPublisher(artifact: "results/zap_xml_report.xml", 
                                         productName: 'Juice Shop', 
                                         scanType: 'ZAP Scan', 
+                                        engagementName: 'paweb4@gmail.com')
+                }
+            }
+        }
+        stage('OSV Scan') {
+            steps {
+                sh '''
+                    if ! command -v osv-scanner &> /dev/null; then
+                        curl -sL https://github.com/google/osv-scanner/releases/download/v1.0.1/osv-scanner_1.0.1_linux_amd64.tar.gz | tar xz
+                        sudo mv osv-scanner /usr/local/bin/
+                    fi
+                    osv-scanner --lockfile=package-lock.json --json > results/osv_report.json
+                '''
+            }
+            post {
+                always {
+                     sh '''
+                        docker stop juice-shop
+                    '''
+                    echo 'Archiving results...'
+                    archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
+                    echo 'Sending OSV reports to DefectDojo'
+                    defectDojoPublisher(artifact: "results/osv_report.json",
+                                        productName: 'Juice Shop',
+                                        scanType: 'OSV Scan',
                                         engagementName: 'paweb4@gmail.com')
                 }
             }
