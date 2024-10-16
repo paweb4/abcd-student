@@ -17,7 +17,7 @@ pipeline {
                 sh 'mkdir -p results/'
             }
         }
-        stage('ZAP SCAN') {
+        stage('DAST') {
             steps {
                 sh '''
                     docker stop juice-shop
@@ -47,8 +47,8 @@ pipeline {
                     sh '''
                         docker cp zap:/zap/wrk/reports/zap_html_report.html "${WORKSPACE}/results/zap_html_report.html"
                         docker cp zap:/zap/wrk/reports/zap_xml_report.xml "${WORKSPACE}/results/zap_xml_report.xml"
-                        docker stop zap
-                        docker rm zap
+                        docker stop zap || true
+                        docker rm zap || true
                     '''
                     // Publikacja raportu do DefectDojo
                     echo  'Archiving results...'
@@ -61,7 +61,7 @@ pipeline {
                 }
             }
         }
-        stage('OSV Scan') {
+        stage('SCA SCAN') {
             steps {
                 sh '''
                     if ! command -v go; then
@@ -79,13 +79,13 @@ pipeline {
                         echo "OSV Scanner installed successfully."
                     fi
                     
-                    osv-scanner --lockfile=package-lock.json --json > results/osv_report.json
+                    osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json
                 '''
             }
             post {
                 always {
                      sh '''
-                        docker stop juice-shop
+                        docker stop juice-shop || true
                     '''
                     echo 'Archiving results...'
                     archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
