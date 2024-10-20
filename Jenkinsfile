@@ -79,7 +79,34 @@ pipeline {
                         echo "OSV Scanner installed successfully."
                     fi
                     
-                    osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json
+                    osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json || true
+                '''
+            }
+            post {
+                always {
+                    echo 'Archiving results...'
+                    archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
+                    echo 'Sending OSV reports to DefectDojo'
+                    defectDojoPublisher(artifact: "results/sca-osv-scanner.json",
+                                        productName: 'Juice Shop',
+                                        scanType: 'OSV Scan',
+                                        engagementName: 'paweb4@gmail.com')
+                }
+            }
+        }
+        stage('SECRETS') {
+            steps {
+                sh '''
+                    if ! command -v trufflehog; then
+                        echo "TruffleHog not found. Installing from GitHub..."
+                        git clone https://github.com/trufflesecurity/trufflehog.git
+                        cd trufflehog
+                        go install
+                        export PATH=$PATH:$HOME/go/bin
+                        echo "TruffleHog installed successfully."
+                    fi
+                    
+                    trufflehog git file://. --only-verified --bare > results/trufflehog-secrets.json || true
                 '''
             }
             post {
@@ -89,10 +116,10 @@ pipeline {
                     '''
                     echo 'Archiving results...'
                     archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
-                    echo 'Sending OSV reports to DefectDojo'
-                    defectDojoPublisher(artifact: "results/sca-osv-scanner.json",
+                    echo 'Sending Trufflehog reports to DefectDojo'
+                    defectDojoPublisher(artifact: "results/trufflehog-secrets.json",
                                         productName: 'Juice Shop',
-                                        scanType: 'OSV Scan',
+                                        scanType: 'Trufflehog Scan',
                                         engagementName: 'paweb4@gmail.com')
                 }
             }
