@@ -106,7 +106,7 @@ pipeline {
                         echo "TruffleHog installed successfully."
                     fi
                     
-                    trufflehog git file://. --branch main --only-verified --bare --json > results/trufflehog-secrets.json || true
+                    trufflehog git file://. --branch main --json > results/trufflehog-secrets.json || true
                 '''
             }
             post {
