@@ -50,8 +50,7 @@ pipeline {
                         docker stop zap || true
                         docker rm zap || true
                     '''
-                    // Publikacja raportu do DefectDojo
-                    echo  'Archiving results...'
+                    echo 'Archiving results...'
                     archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
                     echo 'Sending DAST reports to DefectDojo' 
                     defectDojoPublisher(artifact: "results/zap_xml_report.xml", 
@@ -120,6 +119,31 @@ pipeline {
                     defectDojoPublisher(artifact: "results/trufflehog-secrets.json",
                                         productName: 'Juice Shop',
                                         scanType: 'Trufflehog Scan',
+                                        engagementName: 'paweb4@gmail.com')
+                }
+            }
+        }
+        stage('SAST') {
+            steps {
+                sh '''
+                    if ! command -v semgrep; then
+                        echo "Semgrep not found. Installing Semgrep..."
+                        curl -L https://github.com/returntocorp/semgrep/releases/latest/download/semgrep-linux-amd64 -o /usr/local/bin/semgrep
+                        chmod +x /usr/local/bin/semgrep
+                        echo "Semgrep installed successfully."
+                    fi
+
+                    semgrep --config auto --json --output results/sast.json
+                '''
+            }
+            post {
+                always {
+                    echo 'Archiving SAST results...'
+                    archiveArtifacts artifacts: 'results/sast.json', fingerprint: true, allowEmptyArchive: true
+                    echo 'Sending Semgrep report to DefectDojo'
+                    defectDojoPublisher(artifact: "results/sast.json",
+                                        productName: 'Juice Shop',
+                                        scanType: 'Semgrep JSON Report',
                                         engagementName: 'paweb4@gmail.com')
                 }
             }
